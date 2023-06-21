@@ -1,0 +1,318 @@
+---
+title: "STA 137 Final Project"
+author: "Camden Possinger"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introduction 
+
+The Central African Republic (C.A.R) is regarded as one of the most underdeveloped countries in the world ranking 188 out of 189 on the United Nations Human Development Index. The C.A.R was brought under French colonial rule in the late 19th century and became independent in 1960. The French colonists favored certain ethnic groups over others which resulted in political rivalries that still exist today. After the C.A.R gained independence the country was plagued with political unrest and interethnic civil war fueled by colonialism. After the C.A.R gained independence the country lost most of its financial investment from France and struggled to find other international financial backing. In the 1990s the C.A.R’s economy was
+strained due to a decrease in the price of cash crops, inflated costs of imports, diamond smuggling, and most significantly corruption and financial mismanagement. This economic strain created a situation where the government was not able to pay the salaries of their military and the entire public sector which created major political unrest that continues today. The country’s economy mainly consists of agriculture, mining diamonds, and timber, but is hindered by a poor transportation network. There are no railroads and only 400 miles of paved roads in the country so most commerce is transported by various rivers to the Congo. In this data analysis,
+we will explore and model global export data from the Central African Republic from when the country gained independence in 1960 to 2017.
+
+
+```{r, include=FALSE}
+library(magrittr)
+library(forecast)
+library(astsa)
+library(kableExtra)
+
+rm(list=ls())
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+#### Step 0: Data Prep ####
+
+load(paste0(getwd(),"/finalproject.RData"))
+
+export_data <- ts(finalPro_data$Exports,1960,2017)
+
+```
+
+### Exploratory Data Analysis
+
+```{r, echo=FALSE,fig.asp=0.55}
+
+export_data %>% plot(main = "Central African Republic Exports",
+                     ylab ="% of GDP From Exports",
+                     xlab = "Year" )
+
+```
+
+The above plot shows the C.A.R's percentage of GDP from exports over the course of 57 years from 1960 to 2017. In this plot we can see a clear overall downward trend over time with some periods of growth in the late 1960s and 1990s. We can see that the average of this data is not constant so it is not stationary which is required for a formal statistical analysis of this data. To combat this issue we must transform our data to create a stationary time series. 
+
+### Data Transformation
+
+```{r, echo=FALSE}
+
+export_data_diff <- export_data %>%  diff
+export_data_diff %>% plot
+
+```
+
+In this plot the first order difference of $x_t$ which is the original C.A.R export data.
+We define the first order difference of $x_t$ as: 
+
+\[\Delta x_t = x_t - x_{t-1}\]
+
+
+This differencing creates a stationary time series with mean close to 0 that we can potentially model.
+
+\begin{center}
+```{r, echo=FALSE,}
+# mean is close to 0
+export_data_diff %>% mean %>% kable(col.names = c("Mean"),align = c("c"))
+
+```
+\end{center}
+
+Now let's look at the Autocorrelation Function (ACF) and Partial Autocorrlation Function (PACF) of this data to see if there are any relationships between observed data points based on the lagged time between them to get an idea of what type of model will fit best. 
+
+### ACF/PACF
+
+```{r, echo=FALSE,fig.asp=0.55}
+#### Step 4: Examine ACF/PACF ####
+
+# ACF implies MA(1)
+# PACF implies AR(2)
+
+par(mfrow = c(1,2))
+export_data_diff %>% acf(main = "ACF")
+export_data_diff %>% pacf(main = "PACF")
+
+```
+
+Here we have the plots for both the ACF and PACF for our differenced C.A.R export data. Each lag indicates the distance between any two observed data points. For example if the lag is 2 then the ACF reports the Autocorrelation between $x_1$ and $x_3$ or $x_5$ and $x_7$. The PACF follows the same interpretation as the ACF but is calulated differently. We can interpret this from the ACF/PACF plots because we assume our time series data is stationary. 
+
+
+
+The ACF indicates that we should use a Moving Average model with one previous data point defined as:
+\begin{center}
+If we set $\Delta x_t = y_t$ then: 
+\end{center}
+\[MA(1) = y_t =  \theta w_{t-1} + w_t\]
+\begin{center}
+
+where $\theta$ is an unknown parameter and $w_{t}$ is a random white noise process.
+
+The PACF indicates that we should use an Autoregressive model with two previous data points defined as:
+\[AR(2) = y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + w_t\]
+
+where $\phi_1,\phi_2$ are unknown parameters and $w_{t}$ is a random white noise process.
+
+
+\end{center}
+
+### Modelling
+
+Based on the ACF/PACF from the previous section we have identified two models that have potential to be a good fit for our C.A.R. export data. When interpreting and selecting a model we look for whether the coefficients are significant, which model has the smallest AIC/BIC, and whether the residuals are white noise. 
+
+
+```{r,echo=FALSE,results='hide',fig.keep='all'}
+
+ma_model <- sarima(export_data,
+                   p = 0,
+                   d = 1, 
+                   q = 1,
+                   no.constant = TRUE,
+                   details = FALSE)
+
+ar_model_2 <- sarima(export_data,
+                     p = 2,
+                     d = 1, 
+                     q = 0,
+                     no.constant = TRUE ,
+                     details = FALSE)
+
+
+
+```
+
+
+### MA(1)
+
+First let's take a look at our fitted MA(1) model.
+
+\begin{center}
+```{r,echo=FALSE}
+
+ma_model$ttable %>% kable
+
+```
+\end{center}
+
+In this table R conducts a one sample t test to determine if $\theta$ is 0 or not. This test is defined as:
+
+
+\[H_0: \theta = 0  \]
+\[H_A: \theta \neq 0  \]
+
+Since the p-value is small we can reject the null hypothesis and conclude that $\theta \neq 0$
+We can also see that the estimate for $\theta$ is -0.4172 so our fitted model is:
+
+
+\[y_t = (-0.4172) w_{t-1} + w_t\]
+
+Now let's take a look at the residuals.
+
+
+```{r,echo=FALSE,results='hide',fig.keep='all'}
+
+ma_model <- sarima(export_data,
+                   p = 0,
+                   d = 1, 
+                   q = 1,
+                   no.constant = TRUE)
+
+
+```
+
+The main things to look for in the residuals is that their mean is 0 and check to see if each residual is uncorrelated with all other residuals. We can see from the Standardized Residuals plot that the mean seems to be around 0 which satisfies our first property of white noise. However the ACF and small p-values for the Ljung-Box Statistic show that the residuals are correlated, so we cannot assume that the residuals are a white noise process. The Ljung-Box test is defined as:
+
+\begin{center}
+
+$H_0 =$ The residuals are independently distributed \\
+$H_A =$ The residuals are not independently distributed
+
+\end{center}
+
+### AR(2) 
+
+Next let's take a look at our fitted AR(2) model.
+
+\begin{center}
+```{r,echo=FALSE}
+
+ar_model_2$ttable %>% kable
+
+```
+\end{center}
+
+From this table we can conclude that $\phi_1,\phi_2 \neq 0$ at a significance level of 0.05. 
+We can also see that the estimate for $\phi_1 = -0.5050, \phi_2 = -0.2897$ so our fitted model is:
+
+
+\[y_t = (-0.5050) y_{t-1} + (-0.2897) y_{t-2} + w_t\]
+
+Now let's take a look at the residuals.
+
+```{r,echo=FALSE,results='hide',fig.keep='all'}
+
+
+ar_model_2 <- sarima(export_data,
+                     p = 2,
+                     d = 1, 
+                     q = 0,
+                     no.constant = TRUE)
+
+
+
+```
+
+The Standardized Residuals plot shows that the mean of the residuals seems to be 0 and the ACF and large p-values from the Ljung-Box test indicate that the residuals are uncorrelated with each other. We can assume that in this AR(2) model the residuals are a white noise process. 
+
+\begin{center}
+
+```{r,echo=FALSE}
+
+aic_bic_table <- data.frame("MA_1" = c(ma_model$AIC, ma_model$BIC),
+           "AR_2" = c(ar_model_2$AIC, ar_model_2$BIC)) 
+
+rownames(aic_bic_table) <- c("AIC","BIC")
+
+aic_bic_table %>% kable
+
+```
+
+\end{center}
+
+Finally let's look at the AIC and BIC for both of these models. Here we want to consider which model has a lower AIC/BIC, but in this case there is only a small difference between these values. Based on our residual analysis and comparing the AIC/BIC for both models our final model is the AR(2) or ARIMA(2,1,0) model since the residuals are a white noise process. Our final model is defined in time series notation as:
+
+\[y_t = (-0.5050) y_{t-1} + (-0.2897) y_{t-2} + w_t\]
+
+
+
+
+### Forecasting
+
+```{r, echo=FALSE,fig.asp=0.55}
+
+forecast_model <- arima(export_data, order = c(2,1,0))
+forecast(export_data, model = forecast_model,h = 5) %>% autoplot(xlab = "Year",ylab = "Exports % of GDP")
+
+```
+
+The above plot shows the forecast of C.A.R percentage of GDP from exports over the next 5 years with the dark blue region as the 80% confidence region and the light blue region as the 95% confidence region. We can see that with 95% confidence C.A.R exports will be between about 5 and 19 percent of its total GDP per year over the next 5 years. 
+
+
+### Conclusion
+
+In this time series analysis we studied the exports of the Central African Republic one of the most underdeveloped nations on Earth. We conducted an exploratory data analysis and found a general downward trend in exports from 1960 to 2017 due to political unrest and lack of financial backing. Then we analyzed the ACF and PACF for this export data in order to get an idea of what models would fit best. We concluded that either an MA(1) or AR(2) model would be worth exploring further. We then created models that estimated their respective parameters and conducted a residual analysis to see if the white noise process assumption was satisfied. After considering the residual analysis and looking at the AIC/BIC for both models we choose an AR(2) model because its residuals most resembled a white noise process. Finally we plotted and interpreted a five year forecast from our AR(2) model. Throughout this analysis we witnessed first hand how political instability caused by colonialism negatively affects the Central African Republic's economy after the nation gained independence. 
+
+
+### Code Appendix
+
+```{r eval=FALSE}
+
+library(magrittr)
+library(forecast)
+library(astsa)
+
+rm(list=ls())
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+#### Step 0: Data Prep ####
+
+load(paste0(getwd(),"/finalproject.RData"))
+export_data <- ts(finalPro_data$Exports,1960,2017)
+
+#### Step 1: Plot Data Identify Outliers ####
+
+# No outliers, general downward trend. Not stationary
+export_data %>% plot
+
+#### Step: 2 Transform Data ####
+
+# log helps data be more stationary but impact on ACF/PACF is small 
+#export_data %<>% log
+#export_data %<>% sqrt
+#export_data <- 1 / export_data
+#export_data <- export_data^2 
+
+#### Step 3: Take Differences If Not Stationary ####
+
+# 1st order difference looks stationary
+export_data_diff <- export_data %>% diff
+export_data_diff %>% plot
+
+# mean is close to 0
+export_data_diff %>% mean
+
+#### Step 4: Examine ACF/PACF ####
+
+# ACF implies MA(1)
+# PACF implies AR(2)
+
+export_data_diff %>% acf
+export_data_diff %>% pacf
+
+
+#### Step 5: Create Models ####
+
+ma_model <- sarima(export_data,0,1,1,no.constant = TRUE)
+ar_model_2 <- sarima(export_data,2,1,0,no.constant = TRUE)
+
+
+#### Step 6: Check Residuals Are White Noise ####
+
+#### Step 7: Forecast ####
+
+forcast_model <- arima(export_data, order = c(2,1,0))
+forecast(forcast_model,h = 5) %>% autoplot
+
+```
+

@@ -1,0 +1,247 @@
+---
+title: "STA 137 Homework 1"
+author: "Camden Possinger"
+output: pdf_document
+date: '2022-04-14'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1.
+
+Consider the time series: 
+
+$$x_t = \beta_1 + \beta_2 t + w_t$$
+
+### (a) Determine whether $x_t$ is stationary: 
+
+To determine if $x_t$ is stationary we need to check two conditions:
+
+I. $\mu_x$ does not depend on $t$ and is constant.\newline
+II. $\gamma_x(h)$ only depends on $h = |s-t|$
+
+$$\mu_x = E(x_t) = E(\beta_1 + \beta_2 t + w_t) = \beta_1 + \beta_2 t$$
+
+\begin{center}
+
+since $E(w_t) = 0$
+
+Here $\mu_x$ is not constant and depends on $t$ so $x_t$ is not stationary.
+
+\end{center}
+
+### (b) Show that the process $y_t = x_t - x_{t-1}$ is stationary.
+
+To determine if $y_t$ is stationary we need to check two conditions:
+
+I. $\mu_y$ does not depend on $t$ and is constant.\newline
+II. $\gamma_y(h)$ only depends on $h = |s-t|$
+
+
+$$y_t = \beta_1 + \beta_2 t + w_t - (\beta_1 + \beta_2 (t-1) + w_{t - 1}) = \beta_2 + w_t - w_{t-1}$$
+$$\mu_y = E(y_t) = E(\beta_2 + w_t - w_{t-1}) = \beta_2$$
+\begin{center}
+
+Since $E(w_t) = E(w_{t-1} = 0)$
+
+The first condition is satisfied because $\beta_2$ is a constant that does not depend on $t$
+
+\end{center}
+
+$$\gamma_y(h) = Cov(y_{t+h}, y_t) =$$
+
+$$Cov(\beta_2 + w_{t-h} - w_{t-h}, \beta_2 + w_t - w_{t-1}) =$$
+
+$$E((\beta_2 + w_{t+h} - w_{t+h-1}) - \beta_2, (\beta_2 + w_t - w_{t-1}) - \beta_2)$$
+
+$$\gamma_y(h) = E((w_{t+h} - w_{t+h-1})(w_t - w_{t-1})) =$$ 
+
+$$E[(w_{t+h})(w_t) + (w_{t+h})(w_{t-1}) - (w_{t+h-1})(w_t) + (w_{t+h-1})(w_{t-1})]$$ 
+
+\[ \gamma_y(h) = \begin{cases}   2\sigma_w^2 & h = 0 \\ -\sigma_w^2 & h = |1| \\ 0 & h \geq |2|   \end{cases} \]
+
+\begin{center}
+
+Since the autocovariance function only depends on the lag $h = |s-t|$ 
+
+$y_t = x_t - x_{t-1}$ is stationary
+
+\end{center}
+
+### (c) Show that the mean of the moving average
+
+\[v_t = \frac{1}{2q + 1}  \sum_{j = -q}^{q} x_{t-j} \]
+
+\begin{center}
+
+is $\beta_1 + \beta_2t$, and give a simplified expression for the autocovariance function.
+
+\end{center}
+
+\[ \mu_v = E(v_t) =  \frac{1}{2q + 1}  \sum_{j = -q}^{q} E(x_{t-j}) =  \]
+
+\[  \frac{1}{2q + 1}  \sum_{j = -q}^{q} E(\beta_1 + \beta_2 (t-j) + w_{t - j}) = \]
+
+\[ \frac{1}{2q + 1} \left[\beta_1(2q+1) + \beta_2t(2q+1) - \beta_2 \sum_{j = -q}^{q} j +\sum_{j = -q}^{q}E(w_{t-j})   \right] =  \]
+
+\[ \frac{1}{2q + 1} \left[\beta_1(2q+1) + \beta_2t(2q+1) - 0 + 0   \right] =  \]
+
+\[ \beta_1 + \beta_2t \]
+
+\begin{center}
+
+The autocovariance function is
+
+\end{center}
+
+\[ \gamma_v(h) = Cov(v_{t+h},v_t) = Cov(\frac{1}{2q + 1}  \sum_{j = -q}^{q} x_{t+h-j}, \frac{1}{2q + 1}  \sum_{k = -q}^{q} x_{t-k}) =  \]
+
+\begin{center}
+
+Let $j = h + k$ so we can have sums both in terms of k
+
+\end{center}
+
+\[\frac{1}{(2q + 1)^2} Cov(  \sum_{h+k = -q}^{q} x_{t-k}, \sum_{k = -q}^{q} x_{t-k}) =  \]
+
+\[\frac{1}{(2q + 1)^2} Cov(  \sum_{h+k = -q}^{q} \beta_1 + \beta_2 (t-k) + w_{t-k} , \sum_{k = -q}^{q} \beta_1 + \beta_2 (t-k) + w_{t-k} ) =  \]
+
+\[\frac{1}{(2q + 1)^2} Cov(  \sum_{h+k = -q}^{q} w_{t-k} , \sum_{k = -q}^{q} w_{t-k} ) =  \]
+
+\[\frac{(2q + 1 - |h|)\sigma_w^2}{(2q + 1)^2} \]
+
+\[ \gamma_v(h) = \begin{cases}   \frac{(2q + 1 - |h|)\sigma_w^2}{(2q + 1)^2} & 0 \leq |h| \leq q \\ 0 & |h| > q  \end{cases} \]
+
+### 1.7 For a moving average process of the form:
+
+$$x_t = w_{t-1} + 2w_t + w_{t+1}$$
+(a) Autocovariance Function
+
+\[\mu_x = 0\]
+
+\[ \gamma_x(h) = Cov(x_{t+h}, x_t) = Cov(w_{t+h-1} + 2w_{t+h} + w_{t+h+1}, w_{t-1} + 2w_t + w_{t+1}) = \]
+
+\[E \left[ (w_{t+h-1} + 2w_{t+h} + w_{t+h+1})(w_{t-1} + 2w_t + w_{t+1})\right] = \]
+
+$$
+\begin{aligned}
+E[ (w_{t+h+1})(w_{t-1}) + (w_{t+h+1})(2w_t) + (w_{t+h+1})(w_{t+1})+ \\  
+(2w_{t+h})(w_{t-1}) +   (2w_{t+h})(2w_t) +    (2w_{t+h})(w_{t+1}) + \\ 
+(w_{t+h+1})(w_{t-1}) +    (w_{t+h+1})(2w_t) +     (w_{t+h+1})(w_{t+1})]  
+\end{aligned}
+$$ 
+            
+\[ \gamma_x(h) = \begin{cases}   6\sigma_w^2 & h = 0 \\ 4\sigma_w^2 & |h| = 1 \\ \sigma_w^2 & |h| = 2 \\ 0 & |h| \geq 3 \end{cases} \]
+
+(b) Autocorrelation Function
+
+\[ \rho_x(0) = \frac{\gamma_x(0)}{\gamma_x(0)} = \frac{6\sigma_w^2}{6\sigma_w^2} = 1 \]
+
+\[ \rho_x(1) = \frac{\gamma_x(1)}{\gamma_x(0)} = \frac{4\sigma_w^2}{6\sigma_w^2} = \frac{2}{3} \]
+
+\[ \rho_x(2) = \frac{\gamma_x(2)}{\gamma_x(0)} = \frac{\sigma_w^2}{6\sigma_w^2} = \frac{1}{6} \]
+
+\[ \rho_x(3) = \frac{\gamma_x(3)}{\gamma_x(0)} = \frac{0}{6\sigma_w^2} = 0 \]
+
+\[ \rho_x(h) = \begin{cases}   1 & h = 0 \\ \frac{2}{3} & |h| = 1 \\ \frac{1}{6} & |h| = 2 \\ 0 & |h| \geq 3 \end{cases} \]
+
+
+```{r}
+library(magrittr)
+set.seed(42)
+(rnorm(500) %>% stats::filter(filter = c(1,2,1),method = "convolution")) %>%  na.omit %>%  acf
+```
+
+
+### 1.13 Consider the two series
+
+\[x_t = w_t\]
+
+\[y_t = w_t - \theta w_{t-1} + u_t\]
+
+#### (a) Express the ACF, $\rho_y(h)$,for h = 0,±1,±2,... of the series $yt$ as a function of $\sigma_w^2$, $\sigma_u^2$ and $\theta$.
+
+\[ \gamma_y(h) = Cov(y_{t+h}, y_t) = Cov(w_{t + h} - \theta w_{t + h - 1} + u_{t + h}, w_t - \theta w_{t - 1} + u_t)=\]
+
+$$
+\begin{aligned}
+E[(w_{t+h})(w_t) - (w_{t+h})(\theta w_{t-1})+ (w_{t+h})(u_t) \\
+   -(\theta w_{t+h-1})(w_t) + (\theta w_{t+h-1})(\theta w_{t-1}) - (\theta w_{t+h-1})(u_t) + \\
+   (u_{t+h})(w_t) - (u_{t+h})(\theta w_{t-1}) + (u_{t+h})(u_t)]  
+\end{aligned}
+$$ 
+\[ \gamma_y(h) = \begin{cases}   (1+\theta^2)\sigma_w^2 + \sigma_u^2 & h = 0 \\ -\sigma_w^2 & |h| = 1 \\ 0 & |h| \geq 2 \end{cases} \]
+
+\[ \rho_y(0) = \frac{\gamma_y(0)}{\gamma_y(0)} = \frac{(1+\theta^2)\sigma_w^2 + \sigma_u^2}{(1+\theta^2)\sigma_w^2 + \sigma_u^2} = 1 \]
+
+\[ \rho_y(\pm 1) = \frac{\gamma_y(1)}{\gamma_y(0)} = \frac{-\sigma_w^2}{(1+\theta^2)\sigma_w^2 + \sigma_u^2} = \frac{-\sigma_w^2}{(1+\theta^2)\sigma_w^2 + \sigma_u^2} \]
+
+\[ \rho_y(\pm 2) = \frac{\gamma_y(2)}{\gamma_y(0)} = \frac{0}{(1+\theta^2)\sigma_w^2 + \sigma_u^2} = 0 \]
+
+\[ \rho_y(h) = \begin{cases}   1 & h = 0 \\ \frac{-\sigma_w^2}{(1+\theta^2)\sigma_w^2 + \sigma_u^2} & |h| = 1 \\ 0 & |h| \geq 2 \end{cases} \]
+
+#### (b) Determine the CCF, $\rho_{xy}(h)$ relating $x_t$ and $y_t$
+
+\[ \gamma_x(h) = \begin{cases}   \sigma_w^2 & h = 0 \\ 0 & h \neq 0  \end{cases} \]
+
+\[\gamma_{xy}(h) = Cov(x_{t+h}, y_t) = Cov(w_{t+h},w_t - \theta w_t + u_t) = \]
+
+$$
+\begin{aligned}
+E[(w_{t + h})(w_t) - (w_{t + h})(\theta w_{t-1}) + (w_{t + h})(u_t)]  
+\end{aligned}
+$$ 
+
+\[ \gamma_{xy}(h) = \begin{cases}   \sigma_w^2 & h = 0 \\ -\theta \sigma_w^2 & h = -1 \\ 0 & otherwise  \end{cases} \]
+
+\[ \rho_{xy}(0) = \frac{\gamma_{xy}(0)}{\sqrt{\gamma_x(0) \gamma_y(0)}} = \frac{\sigma_w^2}{\sqrt{\sigma_w^2[(1+\theta^2)\sigma_w^2 + \sigma_u^2]}} = \frac{\sigma_w}{\sqrt{(1+\theta^2)\sigma_w^2 + \sigma_u^2}}\] 
+
+\[ \rho_{xy}(1) = \frac{\gamma_{xy}(1)}{\sqrt{\gamma_x(0) \gamma_y(0)}} = \frac{0}{\sqrt{\sigma_w^2[(1+\theta^2)\sigma_w^2 + \sigma_u^2]}} = 0 \]
+
+\[ \rho_{xy}(-1) = \frac{\gamma_{xy}(-1)}{\sqrt{\gamma_x(0) \gamma_y(0)}} = \frac{-\theta \sigma_w^2}{\sqrt{\sigma_w^2[(1+\theta^2)\sigma_w^2 + \sigma_u^2]}} = \frac{-\theta \sigma_w}{\sqrt{(1+\theta^2)\sigma_w^2 + \sigma_u^2}} \]
+
+\[ \rho_{xy}(2) = \frac{\gamma_{xy}(2)}{\sqrt{\gamma_x(0) \gamma_y(0)}} = \frac{0}{\sqrt{\sigma_w^2[(1+\theta^2)\sigma_w^2 + \sigma_u^2]}} = 0 \]
+
+\[ \rho_{xy}(-2) = \frac{\gamma_{xy}(-2)}{\sqrt{\gamma_x(0) \gamma_y(0)}} = \frac{0}{\sqrt{\sigma_w^2[(1+\theta^2)\sigma_w^2 + \sigma_u^2]}} = 0 \]
+
+\[ \rho_{xy}(h) = \begin{cases} \frac{\sigma_w}{\sqrt{(1+\theta^2)\sigma_w^2 + \sigma_u^2}}  & h = 0 \\ 
+                                 \frac{-\theta \sigma_w}{\sqrt{(1+\theta^2)\sigma_w^2 + \sigma_u^2}} & h = -1 \\ 
+                                 0 & otherwise  \end{cases} \]
+                                
+#### (c) Show that $x_t$ and $y_t$ are jointly stationary: 
+
+
+\begin{center}
+
+We know from previous problems that $x_t$ and $y_t$ are stationary
+
+$\gamma_{xy}(h)$ only depends on $h = |s-t|$ 
+
+So $x_t$ and $y_t$ are jointly stationary
+
+\end{center}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

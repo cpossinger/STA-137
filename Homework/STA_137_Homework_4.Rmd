@@ -1,0 +1,106 @@
+---
+title: "STA 137 Homework 4"
+author: "Camden Possinger"
+date: '2022-05-12'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1. Using the difference equation approach to compute the ACF for the ARMA(1,1) model $x_t= \phi x_{t-1} + w_t+ \theta w_{t-1}, |\phi|< 1$
+
+\[\gamma(h) = cov(x_{t+h}, x_t) = cov(\sum_{j = 1}^p \phi_jx_{t+h-j} + \sum_{j = 0}^q \theta_j w_{t+h-j},x_t) =    \]
+\[\sum_{j = 1}^p \phi_jcov(  x_{t+h-j}, x_t) + \sum_{j = 0}^q \theta_j cov(w_{t+h-j}, x_t) =  \]
+\[\sum_{j = 1}^p \phi_j \gamma(h - j) + \sigma^2 \sum_{j = h}^q \theta_j \psi_{j - h} \]
+\[ h \geq 0\]
+\[cov(w_{t+h-j},x_t) = cov(w_{t+h-j},\sum_{k = 0}^\infty \psi_k w_{t-k}) = \psi_{j - h}\sigma^2 \]
+
+Since $|\phi| < 1$ we can assume this is a causal ARMA process and can write its general homogeneous equation.
+
+\[\gamma(h) - \phi\gamma(h - 1) = 0 \]
+
+The general solution to this difference equation is:
+
+\[\gamma(h) = c \phi^h\]
+
+The initial conditions can be found using: 
+\[ \gamma(h) - \sum_{j = 1}^p \phi_j \gamma(h - j) = \sigma^2 \sum_{j = h}^q \theta_j \psi_{j - h}\]
+\[0 \leq h < max(p, q + 1)\]
+
+\[\gamma(0) - \phi \gamma(-1) = \sigma^2 \sum_{j = 0}^1 \theta_j \psi_{j - h} =  \]
+\[\gamma(0) - \phi \gamma(1) = \sigma^2[\theta_0 \psi_0 + \theta_1 \psi_1]\]
+\[\theta_0 = \psi_0 = 1 \]
+\[\psi_1 = \phi + \theta\]
+\[\gamma(0) = \phi\gamma(1) + \sigma^2[1+\theta\phi + \theta^2]\]
+
+
+
+\[\gamma(1) = \phi\gamma(0) + \sigma^2\theta\]
+
+
+Now we can solve for $\gamma_(0)$ and $\gamma(1)$
+
+\[\phi \gamma(1) + \sigma^2[1+\theta \phi + \theta^2] = \frac{\gamma(1) - \sigma^2 \theta}{\phi}   \]
+\[\phi^2 \gamma(1) + \phi \sigma^2 + \theta \phi^2 \sigma^2 + \theta^2 \phi \sigma^2 + \sigma^2 \theta = \gamma(1) \]
+\[ \phi \sigma^2 + \theta \phi^2 \sigma^2 + \theta^2 \phi \sigma^2 + \sigma^2 \theta = \gamma(1) - \phi^2 \gamma(1) \]
+\[\frac{\sigma^2 (\phi + \theta \phi^2 + \theta^2 \phi + \theta)}{1-\phi^2} = \gamma(1)\]
+\[\frac{\sigma^2 (1+\theta \phi)(\phi + \theta)}{1-\phi^2} = \gamma(1)\]
+
+
+\[\phi \gamma(0) + \sigma^2 \theta =\frac{\gamma(0) - \sigma^2 [1+\theta \phi + \theta^2]}{\phi} \]
+\[\phi^2 \gamma(0) + \phi \sigma^2 \theta +\sigma^2 [1+ \theta \phi + \theta^2] = \gamma(0) \]
+\[\sigma^2 [\phi \theta + 1 + \phi \theta + \theta^2] = \gamma(0) - \phi^2 \gamma(0)\]
+\[\frac{\sigma^2 (1+2\theta \phi + \theta^2)}{1-\phi^2} = \gamma(0)\]
+
+
+The general solution to the difference equation is $\gamma(h) = \frac{\gamma(1)}{\phi} \phi^h$ since $c = \frac{\gamma(1)}{\phi}$
+
+\[\gamma(h) = \sigma^2  \frac{(1+\theta \phi)(\phi + \theta)}{1-\phi^2} \phi^{h - 1}    \]
+
+\[\rho(h) = \frac{\gamma(h)}{\gamma(0)}\]
+
+\[\rho(h) = \frac{\sigma^2  \frac{(1+\theta \phi)(\phi + \theta)}{1-\phi^2} \phi^{h - 1}}{\frac{\sigma^2 (1+2\theta \phi + \theta^2)}{1-\phi^2}}\]
+
+\[\rho(h) = \frac{(1+\theta \phi)(\phi + \theta) }{(1+2\theta \phi + \theta^2)}\phi^{h - 1} \]
+
+
+### 2. When $\theta = 0$, we get the ARMA(1,0) model which is the AR(1) model. Check whether your solution matches that of equation (3.8) of the textbook
+
+
+When $\theta = 0$ the resulting equation is:
+
+\[\rho(h) = \frac{(1+\theta \phi)(\phi + \theta) }{(1+2\theta \phi + \theta^2)}\phi^{h - 1} \]
+
+\[\rho(h) = \phi \phi^{h - 1} = \phi^h\]
+
+This result is the same as in equation 3.8
+
+
+### 3. When $\phi = 0$, we get the ARMA(0,1) model which is the MA(1) model. Check whether your solution matches that of Example 3.5 of the textbook
+
+When $\phi = 0$ the resulting equation is:
+
+\[\rho(h) = \frac{(1+\theta \phi)(\phi + \theta) }{(1+2\theta \phi + \theta^2)}\phi^{h - 1} \]
+
+\[\rho(h) = \frac{\theta}{1+\theta^2}\]
+
+This result is the same as in example 3.5
+
+### 4. Plot the sample ACFs when $\theta = 0.9$ and $\phi = 0.6$ using R for a few lags h = 0,1,2,3,4,5. Check whether they are close to your theoretical derivations.
+
+```{r}
+library(magrittr)
+library(kableExtra)
+set.seed(42)
+
+arima.sim(list(ar = c(0.6),ma = c(0.9)),500) %>% acf(lag.max = 5,main = "ARMA(1,1)")
+
+ARMAacf(ar = c(0.6), ma = c(0.9), lag.max = 5) %>% t %>% kbl
+
+```
+
+Here we can see that for a sample from 500 random normally distributed variables the sample ACF values for each lag h are very close to the theoretical ACF values 
+
+

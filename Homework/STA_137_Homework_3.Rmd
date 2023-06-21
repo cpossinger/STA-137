@@ -1,0 +1,127 @@
+---
+title: "STA 137 Homework 3"
+author: "Camden Possinger"
+date: '2022-05-06'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 3.1 For an MA(1), $x_t = w_t + \theta w_t-1$, show that $|\rho_x(1)| \leq \frac{1}{2}$ for any number $\theta$. For which values of $\theta$ does $\rho_x(1)$ attain its maximum and minimum?
+
+First we need to find $\gamma_x(h)$ 
+
+\[\gamma_x(h) = Cov(x_{t+h}, x_t) = Cov( w_{t+h} + \theta w_{t + h -1}, w_t + \theta w_t-1) =  \]
+\[ E[ (w_{t+h})(w_t) + (w_{t+h})(\theta w_{t-1})  +(\theta w_{t+h-1})(w_t) + (\theta w_{t+h-1})(\theta w_{t-1})] \]
+\[\gamma_x(h) = \begin{cases} \sigma^2(1+\theta^2) & h = 0 \\ \theta \sigma^2 & |h| = 1 \\ 0 & otherwise \end{cases} \]
+
+Now we need to define $|\rho_x(1)|$ and the maximum/minimum values for $\theta$
+
+\[|\rho_x(1)| = \frac{\theta \sigma^2}{\sigma^2(1+\theta^2)} = \frac{\theta}{(1+\theta^2)}\]
+
+\[ \frac{d \theta}{d (1+\theta^2)} = \frac{1+\theta^2 - \theta(2\theta)}{(1+\theta^2)^2} = \frac{1-\theta^2}{(1+\theta^2)^2} \]
+ \[ \frac{1-\theta^2}{(1+\theta^2)^2} = 0  \]
+ \[ 1-\theta^2 = 0  \]
+ \[ 1 = \theta^2  \]
+ \[ \theta = \pm 1\]
+ 
+ $\rho_x(1)$ achieves its maximum and minimun when $\theta = \pm 1$
+ 
+ 
+ \[|\rho_x(1)|, \theta = \pm 1\]
+ \[ \frac{\theta}{(1+\theta^2)} = |\frac{1}{2}| \]
+ 
+ So $|\rho_x(1)| \leq |\frac{1}{2}|$ for all values of $\theta$
+ 
+### 3.4 Identify the following models as ARMA(p,q) models (watch out for parameter redundancy), and determine whether they are causal and/or invertible: 
+ 
+### (a) $x_t = 0.8x_{t-1} - 0.15x_{t-2} + w_t - 0.3w_{t-1}$
+
+We can write this expresson as: 
+
+\[x_t - 0.8x_{t-1} - 0.15x_{t-2} = w_t - 0.3w_{t-1} =  \]
+
+\[(1 - 0.8B - 0.15B^2)x_t = (1 - 0.3B)w_t =  \]
+
+\[(1-0.5B)(1 - 0.3B)x_t = (1 - 0.3B)w_t =  \]
+
+\[(1-0.5B)x_t = w_t \]
+
+Now let's check if this ARMA(1,0) process is causual:
+ 
+\[ \phi(z) = 1-0.5z\]
+
+\[1-0.5z = 0\]
+
+\[1 = 0.5z \]
+
+\[|z| = |2|\]
+
+\[|z| > 1\]
+
+So this ARMA(1,0) process is causal.
+
+\[ \phi(z) \psi(z) = \theta(z)\]
+
+\[ (1-0.5z) (1 + \psi_1z + ...\psi_pz^p) = 1\]
+
+To satisfy this equation $\psi = (0.5^1, 0.5^2, ... 0.5^p)$ Now we can rewrite this process to a one-sided causal process:
+
+\[x_t = \sum_{j = 0}^\infty \psi_j w_{t-j}\]
+
+\[ x_t = (1-0.5B)^{-1}w_t = (\sum_{j = 0}^\infty (0.5B)^j) w_t = \sum_{j = 0}^\infty (0.5)^j (B^jw_t) =  \]
+
+\[x_t = \sum_{j = 0}^\infty (0.5)^j w_{t-j}\]
+
+Since the expression in (a) is an AR(1) process it is inherently invertible with representation:
+
+\[ w_t = x_t - 0.5x_{t-1} \]
+
+\[\pi = (1,-0.5, 0 ...) \]
+
+### (b)
+
+\[ x_t = x_{t-1} - 0.5 x_{t-2} + w_t + w_{t-1} = \]
+
+\[x_t - x_{t-1} +0.5x_{t-2} = w_t - w_{t-1} =  \]
+
+\[(1-B+0.5B^2)x_t = (1-B)w_t\]
+
+Let's check if this ARMA(2,1) process is causal:
+
+\[\phi(z) = 1-z+0.5z^2 \]
+
+\[1-z+0.5z^2 = 0 \]
+
+Using the quadratic formula:
+
+\[ |z| = \sqrt{1^2 + 1^2} = \sqrt{2} >  1   \]
+
+This ARMA(2,1) process is causal.
+
+\[ \phi(z) \psi(z) = \theta(z)\]
+
+\[(1-z+0.5z^2)(1 + \psi_1z + ...\psi_pz^p) = 1-z\]
+
+\[x_t = w_t + \sum_{j =2}^\infty (\psi_j)(w_{t-j})   \]
+
+\[\psi_j = (-0.5,-0.5, -0.25, ...,\psi_j - \psi_{j - 1} + 0.5\psi_{j - 2})\]
+\[j = (2,3,...,\infty)\]
+\[\psi_0 = 1, \psi_1 = 0\]
+
+
+
+\[\theta(z) = 1+z\]
+\[1-z = 0\]
+\[z = 1\]
+
+Since the root lies on the unit circle this ARMA(2,1) process is also not invertible.
+
+
+
+
+
+
+
